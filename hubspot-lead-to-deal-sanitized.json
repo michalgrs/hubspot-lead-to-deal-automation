@@ -1,0 +1,1051 @@
+{
+  "name": "HubSpot Lead-to-Deal Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a67f594e-32e6-4d06-9546-d028ac92603a",
+              "name": "firstName",
+              "value": "={{$json.body.firstName}}",
+              "type": "string"
+            },
+            {
+              "id": "a14173bf-5b74-44b7-b87b-74dbf59b4834",
+              "name": "lastName",
+              "value": "={{$json.body.lastName}}",
+              "type": "string"
+            },
+            {
+              "id": "1856df2e-ac1e-4201-91b3-57cd6195a743",
+              "name": "email",
+              "value": "={{$json.body.email}}",
+              "type": "string"
+            },
+            {
+              "id": "96eaa87b-5633-47a6-bd5f-a3d26e78ddd0",
+              "name": "phone",
+              "value": "={{$json.body.phone}}",
+              "type": "string"
+            },
+            {
+              "id": "f6eb72cd-8216-4875-be99-bc0f980a28f2",
+              "name": "company",
+              "value": "={{$json.body.company}}",
+              "type": "string"
+            },
+            {
+              "id": "3d40c59b-c0f1-4914-b15e-d7ff09c2eed3",
+              "name": "budget",
+              "value": "={{$json.body.budget}}",
+              "type": "number"
+            },
+            {
+              "id": "4b2db711-6b53-4dd3-b9c5-203234e61321",
+              "name": "source",
+              "value": "={{\n  $json.body.source === 'Facebook Ads'\n    ? 'Meta Ads'\n    : $json.body.source\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        0
+      ],
+      "id": "6f865e29-673c-42b4-bfc6-530213fa1955",
+      "name": "Normalize Lead Data"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "055ef77d-cbaa-4813-8fd2-440f520c40ae",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b1bbf9e4-805a-4cff-a2b9-9a1947ea703c",
+      "name": "Lead Intake Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c681ee54-a768-4ca2-bbac-7088fd8438fc",
+              "leftValue": "={{ /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test($json.body.email) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "1aa92e61-5a6b-4119-9203-87967b0253bf",
+              "leftValue": "={{ Number.isFinite(Number($json.body.budget)) && Number($json.body.budget) >= 0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "f6bed8b8-116c-4cdc-87db-c50eb510c4db",
+              "leftValue": "={{ ['Google Ads', 'Facebook Ads', 'LinkedIn', 'Referral', 'Organic'].includes($json.body.source) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "8a1e88bb-29ba-4184-ad6c-9efcf6f0e257",
+      "name": "Validate Lead Data"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2421f6ff-3de6-48ea-befc-0af2053c485a",
+              "leftValue": "={{$json.budget}}",
+              "rightValue": 5000,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        0
+      ],
+      "id": "20c7e4f7-f114-49ac-93d8-0512817cac01",
+      "name": "Classify Lead"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "64051ce2-1ca8-47cf-b374-fae8082a5c45",
+              "name": "status",
+              "value": "Hot Lead",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1120,
+        -96
+      ],
+      "id": "0399f80b-f649-438e-bd35-77f024586c1c",
+      "name": "Set Hot Lead"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "943b7ca4-6c4c-4243-876b-77fa7c543119",
+              "name": "status",
+              "value": "Cold Lead",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1120,
+        64
+      ],
+      "id": "7d949b83-881c-4b18-999b-3188131a1156",
+      "name": "Set Cold Lead"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1360,
+        16
+      ],
+      "id": "8c6a2efb-dc06-44cb-b0e0-a29717224d01",
+      "name": "Merge Lead Path"
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "email": "={{ $('Merge Lead Path').item.json.email }}",
+        "additionalFields": {
+          "companyName": "={{ $json.company }}",
+          "firstName": "={{ $json.firstName }}",
+          "lastName": "={{ $json.lastName }}",
+          "phoneNumber": "={{ $json.phone }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        16
+      ],
+      "id": "dbf0cc47-2f90-4678-a93f-07aeea005a19",
+      "name": "Create / Update Contact",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "__REPLACE_WITH_HUBSPOTAPPTOKEN_CREDENTIAL_ID__",
+          "name": "Configure HubSpot App Token credential"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://api.hubapi.com/crm/v3/objects/contacts/' + $('Merge Lead Path').item.json.email + '?idProperty=email' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"properties\": {\n    \"lead_temperature\": \"{{$('Merge Lead Path').item.json.status}}\",\n    \"lead_budget\": \"{{$('Merge Lead Path').item.json.budget}}\",\n    \"lead_source\": \"{{$('Merge Lead Path').item.json.source}}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1792,
+        16
+      ],
+      "id": "79c8ee84-9156-4552-b5b6-dc1200bcb2e3",
+      "name": "Update CRM Properties",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "__REPLACE_WITH_HTTPBEARERAUTH_CREDENTIAL_ID__",
+          "name": "Configure HubSpot Bearer Auth credential"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ebf50845-8e57-4ca5-99c9-06e82c6ccd2c",
+              "leftValue": "={{$('Merge Lead Path').item.json.status}}",
+              "rightValue": "Hot Lead",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2016,
+        16
+      ],
+      "id": "886f332d-e3ff-4d49-8c82-b184d4378b86",
+      "name": "Is Hot Lead?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "44b62c9c-6978-478f-bcd4-b65e87170cfe",
+              "leftValue": "={{$json.total}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2656,
+        16
+      ],
+      "id": "f0254e59-4dab-4703-89e1-d7b1df263ba4",
+      "name": "Deal Already Exists?"
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "resource": "deal",
+        "stage": "qualifiedtobuy",
+        "additionalFields": {
+          "amount": "={{ $('Merge Lead Path').item.json.budget }}",
+          "associatedVids": "={{ $('Create / Update Contact').item.json.vid }}",
+          "dealName": "={{ $('Merge Lead Path').item.json.firstName + ' ' + $('Merge Lead Path').item.json.lastName + ' - Oferta' }}"
+        }
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        2864,
+        16
+      ],
+      "id": "bdba5030-79b6-4c2f-b533-f17d251dd658",
+      "name": "Create Deal",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "__REPLACE_WITH_HUBSPOTAPPTOKEN_CREDENTIAL_ID__",
+          "name": "Configure HubSpot App Token credential"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "value": "__REPLACE_WITH_DEAL_IDEMPOTENCY_TABLE_ID__",
+          "mode": "list",
+          "cachedResultName": "deal_idempotency",
+          "cachedResultUrl": ""
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $('Merge Lead Path').item.json.email }}",
+            "dealId": "={{ String($json.dealId) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "dealId",
+              "displayName": "dealId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3040,
+        16
+      ],
+      "id": "2bf9cf2e-3f6d-4d12-a0cd-17e1fdc0398a",
+      "name": "Save Deal Lock"
+    },
+    {
+      "parameters": {
+        "operation": "rowNotExists",
+        "dataTableId": {
+          "value": "__REPLACE_WITH_DEAL_IDEMPOTENCY_TABLE_ID__",
+          "mode": "list",
+          "cachedResultName": "deal_idempotency",
+          "cachedResultUrl": ""
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "keyValue": "={{ $('Merge Lead Path').item.json.email }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2240,
+        16
+      ],
+      "id": "6d6c8dc1-222d-4046-9e2e-b919ed2807df",
+      "name": "Check Local Deal Lock"
+    },
+    {
+      "parameters": {
+        "content": "Lead Intake & Validation",
+        "height": 320,
+        "width": 640
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        160,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "b4c6168b-812b-4020-8d64-ef2a251369f9",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Lead Qualification",
+        "height": 320,
+        "width": 608,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        880,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "e445c9ec-c91e-4561-8a97-704a4ea1c7af",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "HubSpot Contact Management",
+        "height": 320,
+        "width": 416,
+        "color": "#224C1F"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1536,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "11023951-e8b9-4f40-8517-cd153231ffe5",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "Deal Creation & Duplicate Protection",
+        "height": 320,
+        "width": 1184,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2000,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "7efa220d-6d3b-4cad-95ed-46d808dc8f8a",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9b5526ae-609f-494b-ad6e-a921b44efbcf",
+              "name": "stage",
+              "value": "Create / Update Contact",
+              "type": "string"
+            },
+            {
+              "id": "b02c5e41-49a3-4f71-80a8-2ebd78eddde4",
+              "name": "errorMessage",
+              "value": "={{ $json.error?.message || $json.error || $json.message || 'Unknown error' }}",
+              "type": "string"
+            },
+            {
+              "id": "ed7fd47c-c5eb-4b08-90dc-6a3797ccd31c",
+              "name": "email",
+              "value": "={{ $('Merge Lead Path').item.json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "bd7e248e-4819-44ea-b00c-69f1d914db2a",
+              "name": "timestamp",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1552,
+        240
+      ],
+      "id": "1ac37568-ffa9-4380-bca1-4aebaf233e0f",
+      "name": "Log Contact Error"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "514a79be-023d-4bbd-a37a-9a9ef5b7b364",
+              "name": "stage",
+              "value": "Update CRM Properties",
+              "type": "string"
+            },
+            {
+              "id": "7d20d50e-821b-4c32-be9e-3b83f588391e",
+              "name": "errorMessage",
+              "value": "={{ $json.error?.message || $json.error || $json.message || 'Unknown error' }}",
+              "type": "string"
+            },
+            {
+              "id": "894da753-000e-4750-b2f8-0dc161dff0f8",
+              "name": "email",
+              "value": "={{ $('Merge Lead Path').item.json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "bf3279fb-7a46-4375-add0-6dda9ea83d67",
+              "name": "timestamp",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1856,
+        240
+      ],
+      "id": "0d6c6602-1aa6-4708-b5c5-af00ff18afa7",
+      "name": "Log Property Update Error"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0b1fbd8c-2c1e-456f-92e9-701d7f681b47",
+              "name": "stage",
+              "value": "Find Existing Open Deal",
+              "type": "string"
+            },
+            {
+              "id": "c477b287-0da3-495d-8cca-7976d63ce94c",
+              "name": "errorMessage",
+              "value": "={{ $json.error?.message || $json.error || $json.message || 'Unknown error' }}",
+              "type": "string"
+            },
+            {
+              "id": "e166a3db-959b-4dd1-857b-1dfe053f7a08",
+              "name": "email",
+              "value": "={{ $('Merge Lead Path').item.json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "61cfc92b-33be-4922-9d50-0940f449048a",
+              "name": "timestamp",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2448,
+        240
+      ],
+      "id": "26e77487-b76e-4c54-b8aa-5c49c224dbc1",
+      "name": "Log Deal Search Error"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0868ecaa-06b5-4411-ad4d-f328df24b69e",
+              "name": "stage",
+              "value": "Create Deal",
+              "type": "string"
+            },
+            {
+              "id": "f9ea89bb-43cd-489c-b85a-d9a905e0ba2f",
+              "name": "errorMessage",
+              "value": "={{ $json.error?.message || $json.error || $json.message || 'Unknown error' }}",
+              "type": "string"
+            },
+            {
+              "id": "cf5f3777-a2ef-4709-b1f2-2f39a2175f8b",
+              "name": "email",
+              "value": "={{ $('Merge Lead Path').item.json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "4d883988-746f-4181-a286-c27f660d1f93",
+              "name": "timestamp",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2864,
+        240
+      ],
+      "id": "1911d65b-acee-4b81-b968-e6f568a64ce3",
+      "name": "Log Deal Creation Error"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "value": "__REPLACE_WITH_WORKFLOW_ERRORS_TABLE_ID__",
+          "mode": "list",
+          "cachedResultName": "workflow_errors",
+          "cachedResultUrl": ""
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "stage": "={{ $json.stage }}",
+            "email": "={{ $json.email }}",
+            "errorMessage": "={{ $json.errorMessage }}",
+            "timestamp": "={{ String($json.timestamp) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "stage",
+              "displayName": "stage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "errorMessage",
+              "displayName": "errorMessage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3072,
+        464
+      ],
+      "id": "8f846212-c268-418e-b2c0-b456f9ec4ced",
+      "name": "Save Error Log"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2864,
+        432
+      ],
+      "id": "30fab3ec-9a66-4006-be50-b0c1412b1f65",
+      "name": "Merge Error Paths"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.hubapi.com/crm/v3/objects/deals/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"filterGroups\": [\n    {\n      \"filters\": [\n        {\n          \"propertyName\": \"associations.contact\",\n          \"operator\": \"EQ\",\n          \"value\": \"{{$('Create / Update Contact').item.json.vid}}\"\n        },\n        {\n          \"propertyName\": \"hs_is_closed\",\n          \"operator\": \"EQ\",\n          \"value\": \"false\"\n        }\n      ]\n    }\n  ],\n  \"properties\": [\n    \"dealname\",\n    \"amount\",\n    \"dealstage\",\n    \"hs_is_closed\"\n  ],\n  \"limit\": 1\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2448,
+        16
+      ],
+      "id": "57f1f2e3-9413-4305-994e-2074a9d736a9",
+      "name": "Find Existing Open Deal",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "__REPLACE_WITH_HTTPBEARERAUTH_CREDENTIAL_ID__",
+          "name": "Configure HubSpot Bearer Auth credential"
+        }
+      },
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Normalize Lead Data": {
+      "main": [
+        [
+          {
+            "node": "Classify Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead Intake Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Lead Data": {
+      "main": [
+        [
+          {
+            "node": "Normalize Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify Lead": {
+      "main": [
+        [
+          {
+            "node": "Set Hot Lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Cold Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Hot Lead": {
+      "main": [
+        [
+          {
+            "node": "Merge Lead Path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Cold Lead": {
+      "main": [
+        [
+          {
+            "node": "Merge Lead Path",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Lead Path": {
+      "main": [
+        [
+          {
+            "node": "Create / Update Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create / Update Contact": {
+      "main": [
+        [
+          {
+            "node": "Update CRM Properties",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Contact Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update CRM Properties": {
+      "main": [
+        [
+          {
+            "node": "Is Hot Lead?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Property Update Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Hot Lead?": {
+      "main": [
+        [
+          {
+            "node": "Check Local Deal Lock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deal Already Exists?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Create Deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Deal": {
+      "main": [
+        [
+          {
+            "node": "Save Deal Lock",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Deal Creation Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Local Deal Lock": {
+      "main": [
+        [
+          {
+            "node": "Find Existing Open Deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Contact Error": {
+      "main": [
+        [
+          {
+            "node": "Merge Error Paths",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Log Property Update Error": {
+      "main": [
+        [
+          {
+            "node": "Merge Error Paths",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Log Deal Search Error": {
+      "main": [
+        [
+          {
+            "node": "Merge Error Paths",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Log Deal Creation Error": {
+      "main": [
+        [
+          {
+            "node": "Merge Error Paths",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Error Paths": {
+      "main": [
+        [
+          {
+            "node": "Save Error Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Existing Open Deal": {
+      "main": [
+        [
+          {
+            "node": "Deal Already Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Deal Search Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "nodeGroups": [],
+  "tags": []
+}
