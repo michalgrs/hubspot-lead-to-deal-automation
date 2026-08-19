@@ -21,6 +21,12 @@ Diagram pokazuje logikę biznesową automatyzacji: od pozyskania leada, przez wa
 | Ponowne wysłanie tego samego leada | Lokalny mechanizm idempotencji i wyszukiwanie otwartych deali w HubSpot zapobiegają duplikatom. |
 | Błąd HubSpot lub API | Kontekst błędu i szczegóły problemu trafiają do `workflow_errors` do dalszej analizy. |
 
+## Kluczowe decyzje projektowe
+
+- **Walidacja i normalizacja przed synchronizacją z HubSpotem** — do CRM trafiają tylko kompletne i spójne dane.
+- **Dwupoziomowa ochrona przed duplikatami** — lokalna idempotencja zabezpiecza przed ponownym przetworzeniem webhooka, a wyszukiwanie otwartych deali w HubSpot chroni przed utworzeniem kolejnej transakcji.
+- **Oddzielna ścieżka obsługi błędów** — błędy integracji są rejestrowane w `workflow_errors`, dzięki czemu można je analizować bez utraty informacji o głównym procesie.
+
 Workflow przyjmuje leady przez webhook, waliduje i normalizuje dane, klasyfikuje leady jako Hot lub Cold, synchronizuje kontakty z HubSpotem, tworzy transakcje dla zakwalifikowanych leadów, zapobiega duplikatom oraz zapisuje błędy integracji.
 
 ---
