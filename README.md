@@ -27,8 +27,6 @@ Diagram pokazuje logikę biznesową automatyzacji: od pozyskania leada, przez wa
 - **Dwupoziomowa ochrona przed duplikatami** — lokalna idempotencja zabezpiecza przed ponownym przetworzeniem webhooka, a wyszukiwanie otwartych deali w HubSpot chroni przed utworzeniem kolejnej transakcji.
 - **Oddzielna ścieżka obsługi błędów** — błędy integracji są rejestrowane w `workflow_errors`, dzięki czemu można je analizować bez utraty informacji o głównym procesie.
 
-Workflow przyjmuje leady przez webhook, waliduje i normalizuje dane, klasyfikuje leady jako Hot lub Cold, synchronizuje kontakty z HubSpotem, tworzy transakcje dla zakwalifikowanych leadów, zapobiega duplikatom oraz zapisuje błędy integracji.
-
 ---
 
 ## Opis projektu
@@ -53,7 +51,7 @@ Projekt pokazuje wykorzystanie kilku typowych wzorców automatyzacji:
 
 Proces został podzielony na cztery główne etapy.
 
-### 1. Lead Intake & Validation
+### 1. Przyjęcie i walidacja leada
 
 Workflow:
 
@@ -63,7 +61,7 @@ Workflow:
 - sprawdza źródło leada
 - zatrzymuje niepoprawne dane przed wysłaniem ich do HubSpot
 
-### 2. Lead Qualification
+### 2. Kwalifikacja leada
 
 Po przejściu walidacji dane są normalizowane.
 
@@ -74,7 +72,7 @@ Workflow:
 - klasyfikuje lead na podstawie budżetu
 - przypisuje status `Hot Lead` lub `Cold Lead`
 
-### 3. HubSpot Contact Management
+### 3. Zarządzanie kontaktem w HubSpot
 
 Kontakt jest następnie synchronizowany z HubSpot CRM.
 
@@ -86,7 +84,7 @@ Workflow:
 - zapisuje budżet
 - zapisuje źródło pozyskania
 
-### 4. Deal Creation & Duplicate Protection
+### 4. Tworzenie transakcji i ochrona przed duplikatami
 
 Dalsza część procesu wykonywana jest tylko dla Hot Leadów.
 
@@ -144,3 +142,14 @@ Zapisywane informacje:
   "budget": 18500,
   "source": "Facebook Ads"
 }
+```
+
+## Uruchomienie workflow
+
+1. W n8n wybierz **Import from File** i zaimportuj plik `hubspot-lead-to-deal-sanitized.json`.
+2. Skonfiguruj własne poświadczenia HubSpot w nodach korzystających z CRM.
+3. Upewnij się, że wymagane właściwości kontaktu, pipeline i etap transakcji istnieją w Twoim koncie HubSpot.
+4. Skonfiguruj adres webhooka oraz przetestuj workflow przykładowym payloadem.
+5. Po poprawnej weryfikacji aktywuj workflow.
+
+> Eksport workflow jest zanonimizowany i nie zawiera tokenów, poświadczeń ani prawdziwych danych klientów.
