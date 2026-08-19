@@ -11,6 +11,16 @@ Diagram pokazuje logikę biznesową automatyzacji: od pozyskania leada, przez wa
 
 ![Diagram architektury automatyzacji n8n i HubSpot](02-architecture-diagram.png)
 
+## Obsługiwane scenariusze
+
+| Sytuacja | Zachowanie workflow |
+| --- | --- |
+| Nowy, poprawny lead | Dane są walidowane i normalizowane, a następnie kontakt jest tworzony lub aktualizowany w HubSpot. |
+| Lead spełniający warunki utworzenia deala | Po kontroli duplikatów workflow tworzy nowy deal w HubSpot. |
+| Brak wymaganych danych | Workflow zatrzymuje przetwarzanie na etapie walidacji — nie powstaje niekompletny rekord. |
+| Ponowne wysłanie tego samego leada | Lokalny mechanizm idempotencji i wyszukiwanie otwartych deali w HubSpot zapobiegają duplikatom. |
+| Błąd HubSpot lub API | Kontekst błędu i szczegóły problemu trafiają do `workflow_errors` do dalszej analizy. |
+
 Workflow przyjmuje leady przez webhook, waliduje i normalizuje dane, klasyfikuje leady jako Hot lub Cold, synchronizuje kontakty z HubSpotem, tworzy transakcje dla zakwalifikowanych leadów, zapobiega duplikatom oraz zapisuje błędy integracji.
 
 ---
