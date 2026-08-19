@@ -5,6 +5,11 @@ Automatyzacja procesu lead-to-deal zbudowana w n8n i zintegrowana z HubSpot CRM.
 ## Workflow overview
 
 ![HubSpot Lead-to-Deal Automation workflow](01-workflow-overview.png)
+## Architektura automatyzacji
+
+Diagram pokazuje logikę biznesową automatyzacji: od pozyskania leada, przez walidację i kwalifikację, po utworzenie deala w HubSpot. Osobna ścieżka rejestruje błędy integracji.
+
+![Diagram architektury automatyzacji n8n i HubSpot](02-architecture-diagram.png)
 
 Workflow przyjmuje leady przez webhook, waliduje i normalizuje dane, klasyfikuje leady jako Hot lub Cold, synchronizuje kontakty z HubSpotem, tworzy transakcje dla zakwalifikowanych leadów, zapobiega duplikatom oraz zapisuje błędy integracji.
 
